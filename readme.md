@@ -149,7 +149,7 @@ export shepherd_HEARTBEAT_S_CMD="${HOME}/.shepherd/heartbeat_s"
 ## Skill 开发
 
 ### 技能格式
-格式自由，但建议每个 Skill 是一个 Markdown 文件，包含：
+格式自由，但建议包含：
 - YAML frontmatter（定义技能元数据）
 - 详细的使用说明和示例
 
