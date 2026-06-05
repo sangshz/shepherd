@@ -487,6 +487,7 @@ interactive_mode() {
 				printf "%s" "$output"
                 ;;
         esac
+		echo ""
     done
 }
 
