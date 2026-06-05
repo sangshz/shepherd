@@ -1,4 +1,4 @@
-```yaml
+---
 name: shepherd
 description: 智能 Shell 助手 - 基于 Bash 的 AI CLI Agent，可将自然语言转换为安全的 Bash 脚本，实现人与计算机的自然交互。代码极简、依赖极少、完全可控，可同时运行多个 Agent 专家。
 ---
@@ -52,7 +52,6 @@ chmod +x ./shepherd.sh
 # 强烈推荐使用 rlwrap 增强交互体验!
 sudo apt install rlwrap  # 安装 rlwrap
 rlwrap -s 2000 -H ~/.shepherd_history ./shepherd.sh
-```
 
 ### 全局安装与别名配置
 ```bash
