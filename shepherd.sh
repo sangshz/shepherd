@@ -9,18 +9,21 @@
 # H. Z. Sang    sanghz@qq.com    Jun 4, 2026  @treegram
 
 # ==================== 配置 ====================
-MAX_HISTORY=20
-MAX_OUTPUT_LINES=1000
-COMMAND_TIMEOUT=30
-TEMPERATURE=0.1
-MAX_TOKENS=5000
+MAX_HISTORY=20              # 历史记录最大长度
+MAX_OUTPUT_LINES=1000       # 执行命令输出最大行数
+COMMAND_TIMEOUT=30          # 执行命令超时（秒），长时业务请放后台：&
+HEARTBEAT_TIME=5            # 心跳（秒）
+TEMPERATURE=0.1             # AI 模型温度参数
+MAX_TOKENS=5000             # AI 模型每次输出最大词元
 MODEL_ADDR="${shepherd_MODEL_ADDR:-https://api.deepseek.com/v1/chat/completions}"
 MODEL_NAME="${shepherd_MODEL_NAME:-deepseek-chat}"  # deepseek-v4-flash  deepseek-v4-pro
 # MODEL_ADDR="https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
 # MODEL_NAME="qwen3.7-max"  #"qwen3-coder-plus"
 # ------------------------------------------------
-WORK_DIR="${shepherd_WORK_DIR:-.}"    # 工作目录默认为当前目录 [ 可通过环境变量 shepherd_WORK_DIR 指定目录 ]
-SKILLS_DIR="${shepherd_SKILLS_DIR}"   # 支持多目录, 写法 xx:yy:zz, 类似$PATH [ 默认为空，需环境变量 shepherd_SKILLS_DIR 指定 ]
+WORK_DIR="${shepherd_WORK_DIR:-.}"            # 工作目录默认为当前目录 [ 可通过环境变量 shepherd_WORK_DIR 指定 ]
+SKILLS_DIR="${shepherd_SKILLS_DIR}"           # 支持多目录, 写法 xx:yy:zz, 类似$PATH [ 默认为空，需环境变量 shepherd_SKILLS_DIR 指定 ]
+HEARTBEAT_CMD="${shepherd_HEARTBEAT_CMD}"     # 心跳执行命令，可用于监控，定时之类任务
+HEARTBEAT_S_CMD="${shepherd_HEARTBEAT_S_CMD}" # 心跳执行的 source 命令，建议只用于参数动态配置，如改变SKILLS_DIR的值
 HISTORY_FILE="/tmp/shepherd_history_$$"
 LOG_FILE="/tmp/shepherd.log"
 
@@ -275,6 +278,13 @@ $(IFS=':' read -ra DIRS <<< "$SKILLS_DIR"; ls -R "${DIRS[@]}")
 ## 你的对话历史文件：
 $HISTORY_FILE
 
+## 你每 $HEARTBEAT_TIME 秒心跳一次，心跳时可以执行的命令:
+$HEARTBEAT_CMD
+
+## 改变内部参数, 如技能目录SKILLS_DIR=技能1目录:技能2目录, 以及MAX_HISTORY，MAX_OUTPUT_LINES，COMMAND_TIMEOUT，TEMPERATURE，MAX_TOKENS ...
+   可在心跳时执行带 source 的命令:
+$HEARTBEAT_S_CMD
+
 ## 当前工作目录状态：
 $(get_workspace_state)
 
@@ -342,6 +352,8 @@ interactive_mode() {
 	echo "╠═══════════════════════════════════════════════════════╣"
     echo "║  工作目录: $WORK_DIR"
     echo "║  Skills目录: $SKILLS_DIR"
+    echo "║  心跳触发 : $HEARTBEAT_CMD"
+    echo "║  心跳触发s: $HEARTBEAT_S_CMD"
     echo "║  特点: 记住对话历史，支持多轮交互                     ║"
     echo "╚═══════════════════════════════════════════════════════╝"
     echo ""
@@ -350,18 +362,30 @@ interactive_mode() {
     echo "  >>> 编译这个文件"
     echo "  >>> 运行编译后的程序"
     echo ""
-    echo "命令: exit 退出, clear 清空历史, history 显示历史, ls   "
+    echo "命令: q/exit 退出, clear 清空历史, history 显示历史, ls "
     echo "      ws 工作目录                                       "
     echo "========================================================"
 
 	YOLO=$1
     
     while true; do
-        echo ""
-		read -p ">>> " user_input
+		# read -p ">>> " user_input
+		printf "\r>>> "
+		read -t $HEARTBEAT_TIME user_input
+
         
         case "$user_input" in
             "" )
+				# heartbeat: 后台执行
+				if command -v "$HEARTBEAT_CMD" &>/dev/null; then
+					"$HEARTBEAT_CMD" &
+				fi
+
+				# heartbeat: source 前台执行 用于配置参数
+				if command -v "$HEARTBEAT_S_CMD" &>/dev/null; then
+					source "$HEARTBEAT_S_CMD"
+				fi
+
                 continue
                 ;;
             "help" )
@@ -518,10 +542,12 @@ main() {
             echo "  -y, --yolo        yolo 模式, 不等待确认, 直接运行生成的命令!"
             echo ""
             echo "环境变量："
-            echo "  DEEPSEEK_API_KEY    DeepSeek API密钥（必需）"
+            echo "  DEEPSEEK_API_KEY         DeepSeek API密钥（必需）"
 			echo "环境变量(用于开头参数初始化，只是传值)："
-            echo "  shepherd_WORK_DIR   工作目录（默认：当前目录.）"
-			echo "  shepherd_SKILLS_DIR 技能目录（默认：无技能）"
+            echo "  shepherd_WORK_DIR        工作目录（默认：当前目录.）"
+			echo "  shepherd_SKILLS_DIR      技能目录（默认：无技能）"
+			echo "  shepherd_HEARTBEAT_CMD   心跳执行命令      （默认：无）"
+			echo "  shepherd_HEARTBEAT_S_CMD 心跳执行source命令（默认：无）"
             echo "  shepherd_MODEL_ADDR 默认 https://api.deepseek.com/v1/chat/completions"
             echo "  shepherd_MODEL_NAME 默认 deepseek-chat"
             ;;
