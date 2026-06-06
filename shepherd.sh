@@ -136,36 +136,11 @@ is_safe_command() {
     
     # 安全命令白名单检查
     local safe_patterns=(
-        "^ls "
-        "^find "
-        "^grep "
-        "^cat "
-        "^head "
-        "^tail "
-        "^wc "
-        "^sort "
-        "^uniq "
-        "^echo "
-        "^mkdir "
-        "^touch "
-        "^cp "
-        "^mv "
-        "^rm [^-]"  # 允许删除文件但不允许 rm -rf /
-        "^git "
-        "^python "
-        "^python3 "
-        "^node "
-        "^npm "
-        "^pip "
-        "^pip3 "
-        "^make "
-        "^gcc "
-        "^clang "
-        "^javac "
-        "^java "
-        "^go "
-        "^cargo "
-        "^rustc "
+        "^ls " "^find " "^grep " "^cat " "^head " "^tail "
+        "^wc " "^sort " "^uniq " "^echo " "^mkdir " "^touch "
+        "^cp " "^mv " "^rm [^-]" "^git " "^python " "^python3 "
+        "^node " "^npm " "^pip " "^pip3 " "^make " "^gcc "
+        "^clang " "^javac " "^java " "^go " "^cargo " "^rustc "
     )
     
     for pattern in "${safe_patterns[@]}"; do
@@ -190,6 +165,42 @@ is_safe_command() {
         "chmod\s+777\s+/"
         "rm\s+-rf\s+~"
         "rm\s+-rf\s+\$HOME"
+
+		# 危险重定向
+        "> */dev/sd" ">/dev/sd" "> /dev/sd"
+        "> */dev/hd" ">/dev/hd" "> /dev/hd"
+        "> */dev/nvme" ">/dev/nvme"
+
+        # 危险删除
+        "rm +-rf +/" "rm +-rf +/.*"
+        "rm +-rf +\~" "rm +-rf +\$HOME"
+        "rm +-rf +\.\.?\."
+
+        # 提权
+        "sudo +" "su +"
+
+        # 危险管道
+        "curl.*\|.*bash" "wget.*\|.*bash"
+        "curl.*\|.*sh" "wget.*\|.*sh"
+        "python -c.*curl" "perl -e.*curl"
+
+        # 文件系统破坏
+        "mkfs\." "dd +if=/dev/zero" "dd +if=/dev/random"
+        "format " "fdisk "
+
+        # 权限修改
+        "chmod +777 +/" "chmod 777 /"
+        "chown +root +/"
+
+        # Fork 炸弹
+        ":\(\)\s*{\s*:;\s*};\s*:"
+
+        # 加密勒索特征
+        "encrypt" "ransom" "crypt"
+
+        # 反弹 shell
+        "bash -i >& /dev/tcp/" "nc -e /bin/bash"
+        "telnet.*|/bin/bash"
     )
     
     for pattern in "${dangerous[@]}"; do
@@ -328,6 +339,9 @@ find . -name '*.log' -size +1M"
     
     # 提取回复
     local reply=$(echo "$response" | jq -r '.choices[0].message.content // empty')
+	local input_tokens=$(echo "$response" | jq -r '.usage.prompt_tokens // 0')
+	local output_tokens=$(echo "$response" | jq -r '.usage.completion_tokens // 0')
+	#local total_tokens=$(echo "$response" | jq -r '.usage.total_tokens // 0')
     
     # 检查是否有错误
     if [ -z "$reply" ]; then
@@ -340,7 +354,7 @@ find . -name '*.log' -size +1M"
     # === 清理markdown代码块 ===
 	reply=$(echo "$reply" | sed -E 's/^```(bash|sh)?\s*\n?//; s/\n?\s*```$//')
     
-    log "DEBUG" "Generated command: $reply"
+    log "DEBUG" "Generated command: $reply -- Token usage - Input: $input_tokens, Output: $output_tokens"
     echo "$reply"
 }
 
@@ -363,7 +377,7 @@ interactive_mode() {
     echo "  >>> 运行编译后的程序"
     echo ""
     echo "命令: q/exit 退出, clear 清空历史, history 显示历史, ls "
-    echo "      ws 工作目录                                       "
+    echo "      ws 工作目录和usage，/cmd 执行外部命令             "
     echo "========================================================"
 
 	YOLO=$1
@@ -395,11 +409,12 @@ interactive_mode() {
                 echo "  3. 运行a.out"
                 echo ""
                 echo "特殊命令："
-                echo "  clear   - 清空对话历史"
-                echo "  history - 显示对话历史"
-                echo "  ls      - 快速列出目录"
-                echo "  ws      - 工作目录"
-                echo "  exit    - 退出"
+                echo "  clear       - 清空对话历史"
+                echo "  history     - 显示对话历史"
+                echo "  ls          - 列出目录（会录到对话历史）"
+                echo "  ws          - 工作目录，Token usage"
+                echo "  q/exit/quit - 退出"
+                echo "  /cmd        - 执行外部命令（不录到对话历史）"
                 continue
                 ;;
             "clear" )
@@ -419,12 +434,18 @@ interactive_mode() {
             "ls" )
                 local output=$(execute_command "ls -la")
                 add_to_history "assistant" "执行了ls命令:\n$output"
-				printf "%s" "$output"
+				printf "%s\n" "$output"
                 continue
                 ;;
             "ws" )
                 echo "$WORK_DIR"
                 add_to_history "assistant" "当前目录: $WORK_DIR"
+				grep "$(date '+%Y-%m-%d')" $LOG_FILE|grep "Token usage"| awk -F 'Input: |, Output: ' '{i+=$2;o+=$3} END {print "today Input:", i, "Output:", o}'
+                continue
+                ;;
+            "/"* )
+				local raw_cmd="${user_input#/}"
+                [ -n "$raw_cmd" ] && printf "%s\n" "$(execute_command "${raw_cmd}" )"
                 continue
                 ;;
         esac
@@ -500,13 +521,9 @@ run_once() {
         exit 1
     fi
     
-    echo "📝 任务: $task"
-    echo "🤖 生成命令..."
-    
     add_to_history "user" "$task"
     
-    local cmd
-    cmd=$(chat_with_deepseek "$task")
+    local cmd=$(chat_with_deepseek "$task")
     
     if [ $? -ne 0 ] || [ -z "$cmd" ]; then
         echo "❌ 无法生成命令"
@@ -518,7 +535,6 @@ run_once() {
         exit 1
     fi
     
-    echo "📋 命令: $cmd"
     execute_command "$cmd"
 }
 
