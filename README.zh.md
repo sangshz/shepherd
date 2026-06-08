@@ -43,7 +43,7 @@ Shepherd 最适合：
 ### 最小化运行
 ```bash
 # 下载 shepherd.sh 后，进入目录
-export DEEPSEEK_API_KEY="your-deepseek-api-key"  # 设置 API Key
+export shepherd_LLM_API_KEY="your-api-key"  # 设置 API Key
 
 # 可选：配置技能目录（多个目录用冒号分隔）
 export shepherd_SKILLS_DIR="skill_dir1:skill_dir2:skill_dir3"
@@ -61,7 +61,7 @@ rlwrap -s 2000 -H ~/.shepherd_history ./shepherd.sh
 sudo cp shepherd.sh /usr/local/bin/
 
 # 在 ~/.bashrc 中添加别名
-alias shepherd='export DEEPSEEK_API_KEY="your-deepseek-api-key"; export shepherd_SKILLS_DIR="$HOME/.shepherd/skills"; rlwrap -s 2000 -H ~/.shepherd_history shepherd.sh'
+alias shepherd='export shepherd_LLM_API_KEY="your-api-key"; export shepherd_SKILLS_DIR="$HOME/.shepherd/skills"; rlwrap -s 2000 -H ~/.shepherd_history shepherd.sh'
 ```
 
 ## 使用方式
@@ -119,8 +119,8 @@ clear
 ### 模型适配
 ```bash
 # 默认使用 DeepSeek，支持其他模型（如千问）
-export shepherd_MODEL_ADDR="https://your-model-endpoint"
-export shepherd_MODEL_NAME="your-model-name"
+export shepherd_LLM_BASE_URL="https://your-model-endpoint"
+export shepherd_LLM_NAME="your-model-name"
 ```
 
 ### 命令白名单/黑名单
@@ -178,7 +178,7 @@ SKILLS_DIR="newskill1:newskill2:newskill3"
 ## 项目信息
 
 - **协议**：MIT License
-- **作者注**：90% 以上的代码由 AI 生成，包括项目名 "Shepherd" 也是 AI 推荐。
+- **作者注**：感谢 deepseek AI 的大力辅助。
 
 ## 安全提示
 
