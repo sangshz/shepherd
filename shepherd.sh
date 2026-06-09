@@ -437,7 +437,7 @@ interactive_mode() {
             "ls" )
                 local output=$(execute_command "ls -la")
                 add_to_history "assistant" "执行了ls命令:\n$output"
-				printf "%s\n" "$output"
+				printf "[add to history]:\n%s\n" "$output"
                 continue
                 ;;
             "ws" )
@@ -447,6 +447,7 @@ interactive_mode() {
                 continue
                 ;;
             "/"* )
+				printf "\033[34m[Not adding to history]:\n\033[0m"
 				local raw_cmd="${user_input#/}"
                 [ -n "$raw_cmd" ] && printf "%s\n" "$(execute_command "${raw_cmd}" )"
                 continue
