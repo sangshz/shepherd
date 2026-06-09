@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 # shepherd.sh - 智能Shell助手 (AI-powered CLI Agent)
 # 用法: ./shepherd.sh -h
 # 例子: 
@@ -478,16 +478,16 @@ interactive_mode() {
         fi
         
         # 显示并确认
-        echo ""
-        echo "📋 生成的命令:"
-        echo "   $cmd"
-        echo ""
 		if $YOLO; then
 			confirm=Y
 		else
+			echo ""
+			echo "📋 生成的命令:"
+			echo "   $cmd"
+			echo ""
 			read -p "执行? [Y/n/e(编辑)] " -n 1 -r confirm
+			echo ""
 		fi
-        echo ""
         
         case "$confirm" in
             n|N)
