@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # shepherd.sh - 智能Shell助手 (AI-powered CLI Agent)
 # 用法: ./shepherd.sh -h
 # 例子: 
@@ -345,6 +345,8 @@ find . -name '*.log' -size +1M"
 	local input_tokens=$(echo "$response" | jq -r '.usage.prompt_tokens // 0')
 	local output_tokens=$(echo "$response" | jq -r '.usage.completion_tokens // 0')
 	#local total_tokens=$(echo "$response" | jq -r '.usage.total_tokens // 0')
+	local cache_hit=$(echo "$response" | jq -r '.usage.prompt_cache_hit_tokens // 0')   # 缓存命中
+	local cache_miss=$(echo "$response" | jq -r '.usage.prompt_cache_miss_tokens // 0') # 缓存未命中
     
     # 检查是否有错误
     if [ -z "$reply" ]; then
@@ -357,7 +359,7 @@ find . -name '*.log' -size +1M"
     # === 清理markdown代码块 ===
 	reply=$(echo "$reply" | sed -E 's/^```(bash|sh)?\s*\n?//; s/\n?\s*```$//')
     
-    log "DEBUG" "Generated command: $reply -- Token usage - Input: $input_tokens, Output: $output_tokens"
+    log "DEBUG" "Generated command: $reply -- Token usage - Input: $input_tokens, Output: $output_tokens, Cache_hit: $cache_hit, Cache_miss: $cache_miss"
     echo "$reply"
 }
 
@@ -443,7 +445,7 @@ interactive_mode() {
             "ws" )
                 echo "$WORK_DIR"
                 add_to_history "assistant" "当前目录: $WORK_DIR"
-				grep "$(date '+%Y-%m-%d')" $LOG_FILE|grep "Token usage"| awk -F 'Input: |, Output: ' '{i+=$2;o+=$3} END {print "today Input:", i, "Output:", o}'
+				grep "$(date '+%Y-%m-%d')" $LOG_FILE|grep "Token usage"| awk -F 'Input: |, Output: |, Cache_hit: |, Cache_miss: ' '{i+=$2;o+=$3;ch+=$4;cm+=$5} END {print "today Input:", i, "Output:", o, "Cache_hit:", ch, "Cache_miss:", cm}'
                 continue
                 ;;
             "/"* )
