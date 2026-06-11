@@ -1,15 +1,15 @@
 ---
 name: shepherd
-description: 智能 Shell 助手 - 基于 Bash 的 AI CLI Agent，可将自然语言转换为安全的 Bash 脚本，实现人与计算机的自然交互。代码极简、依赖极少、完全可控，可同时运行多个 Agent 专家。
+description: 个人 AI 助手 - 基于 Bash 的 AI CLI Agent，可将自然语言转换为安全的 Bash 脚本，实现人与计算机的自然交互。代码极简、依赖极少、完全可控，加载不同 skills 可同时运行多个 Agent 专家。
 ---
 
 > [English](README.md) | [中文版](README.zh.md)
 
-# Shepherd：极简可控的智能 Shell 助手
+# Shepherd：极简可控的 AI 助手
 
 ## 核心理念
 
-Shepherd 是一个完全用 Bash 编写的智能命令行助手，核心能力是将自然语言指令转换为可执行的 Bash 脚本。它基于一个简单而强大的事实：在 Linux/macOS 等 Unix-like 系统中，几乎所有操作都可以通过 Bash 命令完成，而现代 AI 模型恰好具备优秀的代码生成能力。
+Shepherd 是一个完全用 Bash 编写的 AI 助手，核心能力是将自然语言指令转换为可执行的 Bash 脚本。它基于一个简单而强大的事实：在 Linux/macOS 等 Unix-like 系统中，几乎所有操作都可以通过 Bash 命令完成，而现代 AI 模型恰好具备优秀的代码生成能力。
 
 这个项目的愿景是实现从「人用繁琐命令控制计算机」到「人与计算机自然对话完成任务」的范式转变。配合可扩展的技能体系，复杂工作流和自动化任务都可以轻松驾驭。
 
