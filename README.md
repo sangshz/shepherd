@@ -1,17 +1,17 @@
 ---
 name: shepherd
-description: Intelligent Shell Assistant - A Bash-based AI CLI Agent that converts natural language into safe Bash scripts, enabling natural human-computer interaction. Minimal code, minimal dependencies, fully controllable, and capable of running multiple expert agents concurrently.
+description: Personal AI Assistant – A Bash-based AI CLI Agent that translates natural language into safe Bash scripts, enabling natural human-computer interaction. Minimal code, minimal dependencies, fully controllable, and capable of running multiple expert agents simultaneously by loading different skills.
 ---
 
 > [中文版](README.zh.md) | [English](README.md)
 
-# Shepherd: Minimal & Controllable Intelligent Shell Assistant
+# Shepherd: Minimal & Controllable AI Assistant
 
 ## Core Philosophy
 
-Shepherd is an intelligent command-line assistant written entirely in Bash. Its core capability is converting natural language instructions into executable Bash scripts. It is built on a simple but powerful fact: on Unix-like systems (Linux/macOS), almost any operation can be accomplished via Bash commands, and modern AI models happen to excel at code generation.
+Shepherd is an AI assistant written entirely in Bash, with the core ability to convert natural language instructions into executable Bash scripts. It is built on a simple yet powerful truth: on Unix-like systems such as Linux/macOS, nearly every operation can be accomplished with Bash commands, and modern AI models happen to excel at code generation.
 
-The vision of this project is to shift from "humans using complex commands to control computers" to "humans and computers naturally conversing to complete tasks". With an extensible skill system, complex workflows and automation tasks become easy to handle.
+The vision of this project is to enable a paradigm shift from "humans controlling computers through tedious commands" to "humans completing tasks through natural dialogue with computers." With an extensible skill system, complex workflows and automation tasks become easily manageable.
 
 ## Design Philosophy
 
