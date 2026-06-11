@@ -1,5 +1,5 @@
 #!/bin/bash
-# shepherd.sh - 智能Shell助手 (AI-powered CLI Agent)
+# shepherd.sh - 极简可控的 AI 助手 (AI-powered CLI Agent)
 # 用法: ./shepherd.sh -h
 # 例子: 
 # 		export shepherd_LLM_API_KEY="your-api-key"
@@ -367,7 +367,7 @@ find . -name '*.log' -size +1M"
 interactive_mode() {
     echo ""
 	echo "╔═══════════════════════════════════════════════════════╗"
-	echo "║     🐑 Shepherd - 您的智能Shell助手                   ║"
+	echo "║     🐑 Shepherd - 您的AI助手                          ║"
 	echo "╠═══════════════════════════════════════════════════════╣"
     echo "║  工作目录: $WORK_DIR"
     echo "║  Skills目录: $SKILLS_DIR"
