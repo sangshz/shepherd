@@ -162,6 +162,15 @@ cat your-skill.md
 
 # 通过心跳命令动态重载（不是加载，是重载，如需要完全清除不用的技能在历史记录里干扰，执行 clear ），在shepherd_HEARTBEAT_S_CMD 对应的文件里，添加：
 SKILLS_DIR="newskill1:newskill2:newskill3"
+
+# 例子: 根据当前目录自动切换技能集, 心跳文件 heartbeat_s.sh
+#!/bin/bash
+
+if [[ "$PWD" == /project/ai/* ]]; then
+    SKILLS_DIR="/path/to/ai-skills:$BASE_SKILLS"
+elif [[ "$PWD" == /project/web/* ]]; then
+    SKILLS_DIR="/path/to/web-skills:$BASE_SKILLS"
+fi
 ```
 
 ## 实战场景
