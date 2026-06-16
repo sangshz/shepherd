@@ -164,6 +164,15 @@ cat your-skill.md
 
 # Dynamic reload via heartbeat command (not load, but reload; if you need to completely remove unused skills that interfere in history, run `clear`). In the file pointed to by shepherd_HEARTBEAT_S_CMD, add:
 SKILLS_DIR="newskill1:newskill2:newskill3"
+
+# Example: Automatically switch skill sets based on current directory, heartbeat file heartbeat_s.sh
+#!/bin/bash
+
+if [[ "$PWD" == /project/ai/* ]]; then
+    SKILLS_DIR="/path/to/ai-skills:$BASE_SKILLS"
+elif [[ "$PWD" == /project/web/* ]]; then
+    SKILLS_DIR="/path/to/web-skills:$BASE_SKILLS"
+fi
 ```
 
 ## Practical Scenarios
