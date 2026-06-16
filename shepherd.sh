@@ -103,7 +103,7 @@ clear_history() {
 
 # ==================== Skills加载 ====================
 load_all_skills() {
-	IFS=':' read -ra DIR_ARRAY <<< "$SKILLS_DIR"
+	IFS=':' read -ra DIR_ARRAY <<< "$1"
 	for sDIR in "${DIR_ARRAY[@]}"; do
 		[ -z "$sDIR" ] && continue
 		if [ -d "$sDIR" ]; then
@@ -284,7 +284,7 @@ chat_with_llm() {
 3. **理解指代** - 知道\"它\"、\"那个文件\"指的是什么
 
 ## 可用技能：
-$(load_all_skills)
+$(load_all_skills $SKILLS_DIR)
 
 ## 所有技能模块所在文件夹：
 $(IFS=':' read -ra DIRS <<< "$SKILLS_DIR"; ((${#DIRS[@]}!=0)) && find ${DIRS[@]} -name "*.md" )
@@ -462,8 +462,7 @@ interactive_mode() {
         echo "🤖 思考中..."
         
         # 获取命令
-        local cmd
-        cmd=$(chat_with_llm "$user_input")
+        local cmd=$(chat_with_llm "$user_input")
         
         if [ $? -ne 0 ] || [ -z "$cmd" ]; then
             echo "❌ 无法生成命令，请换种方式描述"
